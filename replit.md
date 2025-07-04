@@ -14,7 +14,9 @@ This is a Flask-based web application that serves as an AI-powered marketing ass
 
 ### Backend Architecture
 - **Framework**: Flask (Python web framework)
+- **Database**: PostgreSQL with SQLAlchemy ORM and Flask-Migrate
 - **API Design**: RESTful endpoints with JSON request/response format
+- **Data Persistence**: Campaign and report storage with relational database
 - **Error Handling**: Comprehensive validation with structured error responses
 - **Logging**: Built-in Python logging for debugging and monitoring
 
@@ -65,7 +67,10 @@ This is a Flask-based web application that serves as an AI-powered marketing ass
 ### Python Dependencies
 - **Flask**: Web framework for backend API
 - **Flask-CORS**: Cross-origin resource sharing support
+- **Flask-SQLAlchemy**: SQLAlchemy integration for Flask
+- **Flask-Migrate**: Database migration support
 - **OpenAI**: Official OpenAI Python client library
+- **psycopg2-binary**: PostgreSQL database adapter
 
 ### Frontend Dependencies
 - **Bootstrap 5.3.0**: CSS framework via CDN
