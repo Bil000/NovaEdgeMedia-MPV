@@ -6,6 +6,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from sqlalchemy.orm import DeclarativeBase
 from utils.openai_api import generate_marketing_report
+from integrations.ads_manager import AdsManager
 
 # Configure logging
 logging.basicConfig(level=logging.DEBUG)
@@ -32,6 +33,9 @@ migrate = Migrate(app, db)
 
 # Import models after db initialization
 from models import Campaign, Report
+
+# Initialize advertising integrations
+ads_manager = AdsManager()
 
 with app.app_context():
     db.create_all()
@@ -193,6 +197,193 @@ def get_reports():
         return jsonify({
             'success': False,
             'error': f'Failed to fetch reports: {str(e)}'
+        }), 500
+
+@app.route('/ads/status', methods=['GET'])
+def get_ads_status():
+    """Get connection status for all advertising platforms"""
+    try:
+        status = ads_manager.get_connection_status()
+        return jsonify({
+            'success': True,
+            'status': status
+        })
+    except Exception as e:
+        app.logger.error(f"Error getting ads status: {str(e)}")
+        return jsonify({
+            'success': False,
+            'error': f'Failed to get ads status: {str(e)}'
+        }), 500
+
+@app.route('/ads/campaigns', methods=['GET'])
+def get_ads_campaigns():
+    """Get campaigns from all connected advertising platforms"""
+    try:
+        campaigns_data = ads_manager.get_all_campaigns()
+        return jsonify({
+            'success': True,
+            **campaigns_data
+        })
+    except Exception as e:
+        app.logger.error(f"Error fetching ads campaigns: {str(e)}")
+        return jsonify({
+            'success': False,
+            'error': f'Failed to fetch ads campaigns: {str(e)}'
+        }), 500
+
+@app.route('/ads/performance', methods=['GET'])
+def get_ads_performance():
+    """Get performance data from all connected advertising platforms"""
+    try:
+        days = int(request.args.get('days', 30))
+        performance_data = ads_manager.get_all_performance_data(days=days)
+        
+        # Generate cross-platform insights
+        insights = ads_manager.generate_cross_platform_insights(performance_data)
+        performance_data['insights'] = insights
+        
+        return jsonify({
+            'success': True,
+            **performance_data
+        })
+    except Exception as e:
+        app.logger.error(f"Error fetching ads performance: {str(e)}")
+        return jsonify({
+            'success': False,
+            'error': f'Failed to fetch ads performance: {str(e)}'
+        }), 500
+
+@app.route('/ads/accounts', methods=['GET'])
+def get_ads_accounts():
+    """Get account information from all connected platforms"""
+    try:
+        accounts = ads_manager.get_account_info()
+        return jsonify({
+            'success': True,
+            'accounts': accounts
+        })
+    except Exception as e:
+        app.logger.error(f"Error fetching ads accounts: {str(e)}")
+        return jsonify({
+            'success': False,
+            'error': f'Failed to fetch ads accounts: {str(e)}'
+        }), 500
+
+@app.route('/generate-report-with-ads', methods=['POST'])
+def generate_report_with_ads():
+    """Generate marketing report using both form data and real advertising data"""
+    try:
+        # Validate request data
+        data = request.get_json()
+        if not data:
+            return jsonify({
+                'success': False,
+                'error': 'No data provided'
+            }), 400
+
+        # Required fields validation
+        required_fields = ['campaign_name', 'target_audience', 'budget', 'duration', 'objectives']
+        missing_fields = [field for field in required_fields if not data.get(field)]
+        
+        if missing_fields:
+            return jsonify({
+                'success': False,
+                'error': f'Missing required fields: {", ".join(missing_fields)}'
+            }), 400
+
+        # Validate budget and duration
+        try:
+            budget = float(data.get('budget', 0))
+            duration = int(data.get('duration', 0))
+            if budget <= 0 or duration <= 0:
+                return jsonify({
+                    'success': False,
+                    'error': 'Budget and duration must be positive numbers'
+                }), 400
+        except (ValueError, TypeError):
+            return jsonify({
+                'success': False,
+                'error': 'Budget and duration must be valid numbers'
+            }), 400
+
+        app.logger.info(f"Generating enhanced report for campaign: {data.get('campaign_name')}")
+
+        # Get real advertising data if available
+        real_ads_data = {}
+        if data.get('include_real_data', True):
+            try:
+                # Get current campaigns and performance
+                campaigns_data = ads_manager.get_all_campaigns()
+                performance_data = ads_manager.get_all_performance_data(days=30)
+                
+                real_ads_data = {
+                    'campaigns': campaigns_data,
+                    'performance': performance_data,
+                    'connected_platforms': ads_manager.connected_platforms
+                }
+                
+                app.logger.info(f"Retrieved real ads data from {len(ads_manager.connected_platforms)} platforms")
+            except Exception as e:
+                app.logger.warning(f"Could not retrieve real ads data: {str(e)}")
+
+        # Save campaign to database
+        campaign = Campaign(
+            campaign_name=data.get('campaign_name'),
+            target_audience=data.get('target_audience'),
+            budget=budget,
+            duration=duration,
+            objectives=data.get('objectives'),
+            channels=data.get('channels', ''),
+            current_metrics=data.get('current_metrics', '')
+        )
+        
+        db.session.add(campaign)
+        db.session.commit()
+
+        # Generate enhanced report using OpenAI with real data
+        report = generate_marketing_report(
+            campaign_name=data.get('campaign_name'),
+            target_audience=data.get('target_audience'),
+            budget=budget,
+            duration=duration,
+            objectives=data.get('objectives'),
+            channels=data.get('channels', ''),
+            current_metrics=data.get('current_metrics', ''),
+            real_ads_data=real_ads_data
+        )
+
+        # Add platform integration status to report
+        report['platform_integrations'] = {
+            'status': ads_manager.get_connection_status(),
+            'real_data_included': bool(real_ads_data),
+            'connected_platforms': ads_manager.connected_platforms
+        }
+
+        # Save report to database
+        report_record = Report(
+            campaign_id=campaign.id,
+            report_data=report
+        )
+        db.session.add(report_record)
+        db.session.commit()
+
+        app.logger.info("Enhanced report generated and saved successfully")
+
+        return jsonify({
+            'success': True,
+            'report': report,
+            'campaign_id': campaign.id,
+            'report_id': report_record.id,
+            'real_data_included': bool(real_ads_data)
+        })
+
+    except Exception as e:
+        app.logger.error(f"Error generating enhanced report: {str(e)}")
+        # Rollback in case of error
+        db.session.rollback()
+        return jsonify({
+            'success': False,
+            'error': f'Failed to generate enhanced report: {str(e)}'
         }), 500
 
 @app.errorhandler(404)

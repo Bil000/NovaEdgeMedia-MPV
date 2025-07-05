@@ -12,4 +12,8 @@ dependencies = [
     "openai>=1.93.0",
     "psycopg2-binary>=2.9.10",
     "flask-migrate>=4.1.0",
+    "facebook-business>=23.0.0",
+    "requests>=2.32.4",
+    "sqlalchemy>=2.0.41",
+    "google-ads>=27.0.0",
 ]
