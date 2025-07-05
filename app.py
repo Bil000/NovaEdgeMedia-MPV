@@ -386,6 +386,151 @@ def generate_report_with_ads():
             'error': f'Failed to generate enhanced report: {str(e)}'
         }), 500
 
+@app.route('/credentials/google-ads', methods=['POST'])
+def save_google_ads_credentials():
+    """Save Google Ads credentials securely"""
+    try:
+        data = request.get_json()
+        if not data:
+            return jsonify({'success': False, 'error': 'No credentials provided'}), 400
+
+        # Validate required fields
+        required_fields = ['developer_token', 'client_id', 'client_secret', 'refresh_token', 'customer_id']
+        missing_fields = [field for field in required_fields if not data.get(field)]
+        
+        if missing_fields:
+            return jsonify({
+                'success': False, 
+                'error': f'Missing required fields: {", ".join(missing_fields)}'
+            }), 400
+
+        # Store credentials securely (in production, use encrypted storage)
+        import os
+        os.environ['GOOGLE_ADS_DEVELOPER_TOKEN'] = data['developer_token']
+        os.environ['GOOGLE_ADS_CLIENT_ID'] = data['client_id']
+        os.environ['GOOGLE_ADS_CLIENT_SECRET'] = data['client_secret']
+        os.environ['GOOGLE_ADS_REFRESH_TOKEN'] = data['refresh_token']
+        os.environ['GOOGLE_ADS_CUSTOMER_ID'] = data['customer_id']
+
+        # Reinitialize Google Ads integration with new credentials
+        ads_manager.google_ads._initialize_client()
+        
+        # Test the connection
+        if ads_manager.google_ads.is_connected():
+            # Update connection status
+            ads_manager._check_connections()
+            app.logger.info("Google Ads credentials saved and validated successfully")
+            return jsonify({'success': True, 'message': 'Google Ads connected successfully'})
+        else:
+            return jsonify({
+                'success': False, 
+                'error': 'Failed to connect with provided credentials. Please verify your credentials and try again.'
+            }), 400
+
+    except Exception as e:
+        app.logger.error(f"Error saving Google Ads credentials: {str(e)}")
+        return jsonify({
+            'success': False,
+            'error': f'Failed to save credentials: {str(e)}'
+        }), 500
+
+@app.route('/credentials/meta-ads', methods=['POST'])
+def save_meta_ads_credentials():
+    """Save Meta Ads credentials securely"""
+    try:
+        data = request.get_json()
+        if not data:
+            return jsonify({'success': False, 'error': 'No credentials provided'}), 400
+
+        # Validate required fields
+        required_fields = ['access_token', 'app_id', 'app_secret', 'ad_account_id']
+        missing_fields = [field for field in required_fields if not data.get(field)]
+        
+        if missing_fields:
+            return jsonify({
+                'success': False, 
+                'error': f'Missing required fields: {", ".join(missing_fields)}'
+            }), 400
+
+        # Store credentials securely (in production, use encrypted storage)
+        import os
+        os.environ['META_ACCESS_TOKEN'] = data['access_token']
+        os.environ['META_APP_ID'] = data['app_id']
+        os.environ['META_APP_SECRET'] = data['app_secret']
+        os.environ['META_AD_ACCOUNT_ID'] = data['ad_account_id']
+
+        # Reinitialize Meta Ads integration with new credentials
+        ads_manager.meta_ads._initialize_client()
+        
+        # Test the connection
+        if ads_manager.meta_ads.is_connected():
+            # Update connection status
+            ads_manager._check_connections()
+            app.logger.info("Meta Ads credentials saved and validated successfully")
+            return jsonify({'success': True, 'message': 'Meta Ads connected successfully'})
+        else:
+            return jsonify({
+                'success': False, 
+                'error': 'Failed to connect with provided credentials. Please verify your credentials and try again.'
+            }), 400
+
+    except Exception as e:
+        app.logger.error(f"Error saving Meta Ads credentials: {str(e)}")
+        return jsonify({
+            'success': False,
+            'error': f'Failed to save credentials: {str(e)}'
+        }), 500
+
+@app.route('/credentials/google-ads/test', methods=['POST'])
+def test_google_ads_connection():
+    """Test Google Ads connection without saving credentials"""
+    try:
+        # Test current connection
+        if ads_manager.google_ads.is_connected():
+            account_info = ads_manager.google_ads.get_account_info()
+            return jsonify({
+                'success': True, 
+                'message': 'Google Ads connection successful',
+                'account_info': account_info
+            })
+        else:
+            return jsonify({
+                'success': False, 
+                'error': 'Google Ads not connected. Please add your credentials first.'
+            }), 400
+
+    except Exception as e:
+        app.logger.error(f"Error testing Google Ads connection: {str(e)}")
+        return jsonify({
+            'success': False,
+            'error': f'Connection test failed: {str(e)}'
+        }), 500
+
+@app.route('/credentials/meta-ads/test', methods=['POST'])
+def test_meta_ads_connection():
+    """Test Meta Ads connection without saving credentials"""
+    try:
+        # Test current connection
+        if ads_manager.meta_ads.is_connected():
+            account_info = ads_manager.meta_ads.get_account_info()
+            return jsonify({
+                'success': True, 
+                'message': 'Meta Ads connection successful',
+                'account_info': account_info
+            })
+        else:
+            return jsonify({
+                'success': False, 
+                'error': 'Meta Ads not connected. Please add your credentials first.'
+            }), 400
+
+    except Exception as e:
+        app.logger.error(f"Error testing Meta Ads connection: {str(e)}")
+        return jsonify({
+            'success': False,
+            'error': f'Connection test failed: {str(e)}'
+        }), 500
+
 @app.errorhandler(404)
 def not_found(error):
     """Handle 404 errors"""

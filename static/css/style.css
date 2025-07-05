@@ -441,3 +441,189 @@ body {
 ::-webkit-scrollbar-thumb:hover {
     background: var(--primary-blue);
 }
+
+/* Integration Styles */
+.nav-tabs {
+    border-bottom: 2px solid var(--border-color);
+}
+
+.nav-tabs .nav-link {
+    background: transparent;
+    border: none;
+    color: var(--text-light);
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px 8px 0 0;
+    margin-right: 0.5rem;
+    transition: all 0.3s ease;
+}
+
+.nav-tabs .nav-link:hover {
+    background: rgba(59, 130, 246, 0.1);
+    color: var(--primary-color);
+}
+
+.nav-tabs .nav-link.active {
+    background: var(--primary-color);
+    color: white;
+    border-bottom: 2px solid var(--primary-color);
+}
+
+.connection-status {
+    background: var(--card-background);
+    padding: 1rem;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+}
+
+.status-loading {
+    color: var(--text-light);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.integration-card {
+    background: var(--card-background);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 1.5rem;
+    transition: all 0.3s ease;
+}
+
+.integration-card:hover {
+    border-color: var(--primary-color);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+}
+
+.integration-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.integration-logo {
+    width: 40px;
+    height: 40px;
+    object-fit: contain;
+}
+
+.integration-header h4 {
+    color: var(--text-primary);
+    margin-bottom: 0.25rem;
+}
+
+.integration-header p {
+    color: var(--text-light);
+    font-size: 0.9rem;
+}
+
+.connection-indicator {
+    text-align: right;
+}
+
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.status-connected {
+    background: rgba(16, 185, 129, 0.2);
+    color: #10b981;
+}
+
+.status-disconnected {
+    background: rgba(239, 68, 68, 0.2);
+    color: #ef4444;
+}
+
+.status-testing {
+    background: rgba(251, 191, 36, 0.2);
+    color: #fbbf24;
+}
+
+.integration-form {
+    margin-top: 1rem;
+}
+
+.integration-form.d-none {
+    display: none !important;
+}
+
+.integration-actions {
+    display: flex;
+    align-items: center;
+    margin-top: 1rem;
+}
+
+.integration-help {
+    background: var(--card-background);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 1.5rem;
+}
+
+.help-header h5 {
+    color: var(--text-primary);
+    margin-bottom: 1rem;
+}
+
+.help-content {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+}
+
+.help-section h6 {
+    color: var(--primary-color);
+    margin-bottom: 0.75rem;
+}
+
+.help-section ol {
+    color: var(--text-light);
+    font-size: 0.9rem;
+}
+
+.help-section ol li {
+    margin-bottom: 0.5rem;
+}
+
+.help-section a {
+    color: var(--primary-color);
+    text-decoration: none;
+}
+
+.help-section a:hover {
+    text-decoration: underline;
+}
+
+.help-section code {
+    background: rgba(59, 130, 246, 0.1);
+    color: var(--primary-color);
+    padding: 0.2rem 0.4rem;
+    border-radius: 4px;
+    font-size: 0.85rem;
+}
+
+/* Responsive Integration Design */
+@media (max-width: 768px) {
+    .help-content {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+    
+    .integration-actions {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .integration-actions .btn {
+        width: 100%;
+    }
+}

@@ -115,9 +115,25 @@ This is a Flask-based web application that serves as an AI-powered marketing ass
 
 Preferred communication style: Simple, everyday language.
 
+## Recent Changes
+
+### Customer Credential Management Implementation
+- **User-Friendly Credential Interface**: Added tabbed interface for customers to add their own Google Ads and Meta Ads credentials
+- **Secure Credential Storage**: Backend endpoints to securely handle and validate customer API keys
+- **Real-time Connection Status**: Live status indicators showing platform connection health
+- **Data-Driven AI Reports**: Enhanced OpenAI integration to use real advertising data when available
+- **Cross-Platform Analytics**: Unified dashboard comparing performance across Google and Meta platforms
+
+### Technical Architecture Updates
+- **Platform Integrations**: Complete Google Ads and Meta Ads API integration with unified ads manager
+- **Credential Management**: Secure backend storage and validation of customer API credentials
+- **Enhanced AI Analysis**: Real advertising data integration for improved report accuracy
+- **User Interface**: Professional tabbed interface for campaign analysis and platform connections
+
 ## Changelog
 
 ```
 Changelog:
+- July 05, 2025. Added customer credential management for Google Ads and Meta Ads
 - July 04, 2025. Initial setup
 ```

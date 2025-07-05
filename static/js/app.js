@@ -12,12 +12,18 @@ class MarketingAssistant {
         this.errorState = document.getElementById('errorState');
         this.reportContent = document.getElementById('reportContent');
         
+        // Integration elements
+        this.connectionStatus = {};
+        this.googleCredentialsForm = document.getElementById('googleCredentialsForm');
+        this.metaCredentialsForm = document.getElementById('metaCredentialsForm');
+        
         this.init();
     }
 
     init() {
         this.form.addEventListener('submit', this.handleSubmit.bind(this));
         this.addInputValidation();
+        this.initializeIntegrations();
     }
 
     addInputValidation() {
@@ -320,6 +326,216 @@ class MarketingAssistant {
             element.classList.add('d-none');
             element.classList.remove('fade-in');
         });
+    }
+
+    // Integration Management Methods
+    initializeIntegrations() {
+        // Check connection status on page load
+        this.checkConnectionStatus();
+        
+        // Set up integration form handlers
+        if (this.googleCredentialsForm) {
+            this.googleCredentialsForm.addEventListener('submit', this.handleGoogleCredentials.bind(this));
+        }
+        
+        if (this.metaCredentialsForm) {
+            this.metaCredentialsForm.addEventListener('submit', this.handleMetaCredentials.bind(this));
+        }
+
+        // Set up tab change handler to refresh status
+        const integrationsTab = document.getElementById('integrations-tab');
+        if (integrationsTab) {
+            integrationsTab.addEventListener('shown.bs.tab', () => {
+                this.checkConnectionStatus();
+            });
+        }
+    }
+
+    async checkConnectionStatus() {
+        try {
+            const response = await fetch('/ads/status');
+            const data = await response.json();
+            
+            if (data.success) {
+                this.connectionStatus = data.status;
+                this.updateConnectionUI();
+            }
+        } catch (error) {
+            console.error('Failed to check connection status:', error);
+        }
+    }
+
+    updateConnectionUI() {
+        // Update Google Ads status
+        const googleStatus = document.getElementById('googleAdsStatus');
+        if (googleStatus) {
+            const isConnected = this.connectionStatus.google_ads?.connected || false;
+            this.updateStatusBadge(googleStatus, isConnected, 'Google Ads');
+            
+            // Hide/show form based on connection status
+            const googleForm = document.getElementById('googleAdsForm');
+            if (googleForm) {
+                googleForm.style.display = isConnected ? 'none' : 'block';
+            }
+        }
+
+        // Update Meta Ads status
+        const metaStatus = document.getElementById('metaAdsStatus');
+        if (metaStatus) {
+            const isConnected = this.connectionStatus.meta_ads?.connected || false;
+            this.updateStatusBadge(metaStatus, isConnected, 'Meta Ads');
+            
+            // Hide/show form based on connection status
+            const metaForm = document.getElementById('metaAdsForm');
+            if (metaForm) {
+                metaForm.style.display = isConnected ? 'none' : 'block';
+            }
+        }
+
+        // Update overall status message
+        this.updateOverallStatus();
+    }
+
+    updateStatusBadge(container, isConnected, platformName) {
+        const badge = container.querySelector('.status-badge');
+        if (badge) {
+            badge.className = `status-badge ${isConnected ? 'status-connected' : 'status-disconnected'}`;
+            badge.innerHTML = isConnected 
+                ? `<i class="fas fa-check-circle me-1"></i>Connected`
+                : `<i class="fas fa-times-circle me-1"></i>Disconnected`;
+        }
+    }
+
+    updateOverallStatus() {
+        const statusDiv = document.getElementById('connectionStatus');
+        if (!statusDiv) return;
+
+        const totalConnected = this.connectionStatus.total_connected || 0;
+        const connectedPlatforms = this.connectionStatus.connected_platforms || [];
+
+        if (totalConnected === 0) {
+            statusDiv.innerHTML = `
+                <div class="alert alert-warning mb-0">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    No advertising platforms connected. Add your credentials below to unlock data-driven insights.
+                </div>
+            `;
+        } else {
+            const platformList = connectedPlatforms.map(p => p.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())).join(', ');
+            statusDiv.innerHTML = `
+                <div class="alert alert-success mb-0">
+                    <i class="fas fa-check-circle me-2"></i>
+                    Connected to ${totalConnected} platform${totalConnected > 1 ? 's' : ''}: ${platformList}
+                </div>
+            `;
+        }
+    }
+
+    async handleGoogleCredentials(event) {
+        event.preventDefault();
+        const formData = new FormData(event.target);
+        
+        // Update status to testing
+        const googleStatus = document.getElementById('googleAdsStatus');
+        this.updateStatusBadge(googleStatus, null, 'Google Ads', 'testing');
+        
+        try {
+            const response = await fetch('/credentials/google-ads', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(Object.fromEntries(formData))
+            });
+            
+            const result = await response.json();
+            
+            if (result.success) {
+                // Clear form
+                event.target.reset();
+                // Refresh status
+                await this.checkConnectionStatus();
+                this.showCredentialSuccess('Google Ads connected successfully!');
+            } else {
+                this.showCredentialError(result.error || 'Failed to connect Google Ads');
+                this.updateStatusBadge(googleStatus, false, 'Google Ads');
+            }
+        } catch (error) {
+            this.showCredentialError('Network error connecting to Google Ads');
+            this.updateStatusBadge(googleStatus, false, 'Google Ads');
+        }
+    }
+
+    async handleMetaCredentials(event) {
+        event.preventDefault();
+        const formData = new FormData(event.target);
+        
+        // Update status to testing
+        const metaStatus = document.getElementById('metaAdsStatus');
+        this.updateStatusBadge(metaStatus, null, 'Meta Ads', 'testing');
+        
+        try {
+            const response = await fetch('/credentials/meta-ads', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(Object.fromEntries(formData))
+            });
+            
+            const result = await response.json();
+            
+            if (result.success) {
+                // Clear form
+                event.target.reset();
+                // Refresh status
+                await this.checkConnectionStatus();
+                this.showCredentialSuccess('Meta Ads connected successfully!');
+            } else {
+                this.showCredentialError(result.error || 'Failed to connect Meta Ads');
+                this.updateStatusBadge(metaStatus, false, 'Meta Ads');
+            }
+        } catch (error) {
+            this.showCredentialError('Network error connecting to Meta Ads');
+            this.updateStatusBadge(metaStatus, false, 'Meta Ads');
+        }
+    }
+
+    showCredentialSuccess(message) {
+        // You can implement a toast notification or alert here
+        alert(message);
+    }
+
+    showCredentialError(message) {
+        // You can implement a toast notification or alert here
+        alert('Error: ' + message);
+    }
+}
+
+// Global functions for credential testing
+async function testGoogleConnection() {
+    try {
+        const response = await fetch('/credentials/google-ads/test', { method: 'POST' });
+        const result = await response.json();
+        
+        if (result.success) {
+            alert('Google Ads connection test successful!');
+        } else {
+            alert('Google Ads connection test failed: ' + (result.error || 'Unknown error'));
+        }
+    } catch (error) {
+        alert('Network error testing Google Ads connection');
+    }
+}
+
+async function testMetaConnection() {
+    try {
+        const response = await fetch('/credentials/meta-ads/test', { method: 'POST' });
+        const result = await response.json();
+        
+        if (result.success) {
+            alert('Meta Ads connection test successful!');
+        } else {
+            alert('Meta Ads connection test failed: ' + (result.error || 'Unknown error'));
+        }
+    } catch (error) {
+        alert('Network error testing Meta Ads connection');
     }
 }
 

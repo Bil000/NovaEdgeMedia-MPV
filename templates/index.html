@@ -28,10 +28,28 @@
             <!-- Campaign Form -->
             <div class="col-lg-5 form-section">
                 <div class="form-container">
-                    <div class="section-header">
-                        <h2><i class="fas fa-bullhorn me-2"></i>Campaign Analysis</h2>
-                        <p class="section-subtitle">Generate AI-powered marketing insights for your campaign</p>
-                    </div>
+                    <!-- Navigation Tabs -->
+                    <ul class="nav nav-tabs mb-4" id="mainTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="campaign-tab" data-bs-toggle="tab" data-bs-target="#campaign-pane" type="button" role="tab">
+                                <i class="fas fa-bullhorn me-2"></i>Campaign Analysis
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="integrations-tab" data-bs-toggle="tab" data-bs-target="#integrations-pane" type="button" role="tab">
+                                <i class="fas fa-plug me-2"></i>Platform Integrations
+                            </button>
+                        </li>
+                    </ul>
+
+                    <!-- Tab Content -->
+                    <div class="tab-content" id="mainTabContent">
+                        <!-- Campaign Analysis Tab -->
+                        <div class="tab-pane fade show active" id="campaign-pane" role="tabpanel">
+                            <div class="section-header">
+                                <h2><i class="fas fa-bullhorn me-2"></i>Campaign Analysis</h2>
+                                <p class="section-subtitle">Generate AI-powered marketing insights for your campaign</p>
+                            </div>
 
                     <form id="campaignForm" class="campaign-form">
                         <div class="form-group mb-4">
@@ -97,6 +115,156 @@
                             </span>
                         </button>
                     </form>
+                        </div>
+
+                        <!-- Platform Integrations Tab -->
+                        <div class="tab-pane fade" id="integrations-pane" role="tabpanel">
+                            <div class="section-header">
+                                <h2><i class="fas fa-plug me-2"></i>Platform Integrations</h2>
+                                <p class="section-subtitle">Connect your advertising accounts for data-driven insights</p>
+                            </div>
+
+                            <!-- Connection Status -->
+                            <div id="connectionStatus" class="connection-status mb-4">
+                                <div class="status-loading">
+                                    <i class="fas fa-spinner fa-spin me-2"></i>Checking connections...
+                                </div>
+                            </div>
+
+                            <!-- Google Ads Integration -->
+                            <div class="integration-card mb-4">
+                                <div class="integration-header">
+                                    <div class="d-flex align-items-center">
+                                        <img src="https://developers.google.com/static/ads/images/ads-logo.svg" alt="Google Ads" class="integration-logo me-3">
+                                        <div>
+                                            <h4>Google Ads</h4>
+                                            <p class="mb-0">Connect your Google Ads account for campaign data and performance insights</p>
+                                        </div>
+                                    </div>
+                                    <div class="connection-indicator" id="googleAdsStatus">
+                                        <span class="status-badge status-disconnected">
+                                            <i class="fas fa-times-circle me-1"></i>Disconnected
+                                        </span>
+                                    </div>
+                                </div>
+                                
+                                <div class="integration-form" id="googleAdsForm">
+                                    <form id="googleCredentialsForm">
+                                        <div class="row">
+                                            <div class="col-md-6 mb-3">
+                                                <label for="googleDeveloperToken" class="form-label">Developer Token</label>
+                                                <input type="password" class="form-control" id="googleDeveloperToken" name="developer_token" placeholder="Enter your Google Ads developer token">
+                                            </div>
+                                            <div class="col-md-6 mb-3">
+                                                <label for="googleCustomerId" class="form-label">Customer ID</label>
+                                                <input type="text" class="form-control" id="googleCustomerId" name="customer_id" placeholder="xxx-xxx-xxxx">
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-6 mb-3">
+                                                <label for="googleClientId" class="form-label">OAuth Client ID</label>
+                                                <input type="text" class="form-control" id="googleClientId" name="client_id" placeholder="Your OAuth2 client ID">
+                                            </div>
+                                            <div class="col-md-6 mb-3">
+                                                <label for="googleClientSecret" class="form-label">OAuth Client Secret</label>
+                                                <input type="password" class="form-control" id="googleClientSecret" name="client_secret" placeholder="Your OAuth2 client secret">
+                                            </div>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="googleRefreshToken" class="form-label">Refresh Token</label>
+                                            <input type="password" class="form-control" id="googleRefreshToken" name="refresh_token" placeholder="Your OAuth2 refresh token">
+                                        </div>
+                                        <div class="integration-actions">
+                                            <button type="submit" class="btn btn-primary">
+                                                <i class="fas fa-plug me-2"></i>Connect Google Ads
+                                            </button>
+                                            <button type="button" class="btn btn-outline-secondary ms-2" onclick="testGoogleConnection()">
+                                                <i class="fas fa-vial me-2"></i>Test Connection
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+
+                            <!-- Meta Ads Integration -->
+                            <div class="integration-card mb-4">
+                                <div class="integration-header">
+                                    <div class="d-flex align-items-center">
+                                        <img src="https://static.xx.fbcdn.net/rsrc.php/v3/yX/r/Kvo5FesWVKX.png" alt="Meta Business" class="integration-logo me-3">
+                                        <div>
+                                            <h4>Meta Ads (Facebook & Instagram)</h4>
+                                            <p class="mb-0">Connect your Meta Business account for Facebook and Instagram campaign data</p>
+                                        </div>
+                                    </div>
+                                    <div class="connection-indicator" id="metaAdsStatus">
+                                        <span class="status-badge status-disconnected">
+                                            <i class="fas fa-times-circle me-1"></i>Disconnected
+                                        </span>
+                                    </div>
+                                </div>
+                                
+                                <div class="integration-form" id="metaAdsForm">
+                                    <form id="metaCredentialsForm">
+                                        <div class="row">
+                                            <div class="col-md-6 mb-3">
+                                                <label for="metaAccessToken" class="form-label">Access Token</label>
+                                                <input type="password" class="form-control" id="metaAccessToken" name="access_token" placeholder="Your Meta Business access token">
+                                            </div>
+                                            <div class="col-md-6 mb-3">
+                                                <label for="metaAdAccountId" class="form-label">Ad Account ID</label>
+                                                <input type="text" class="form-control" id="metaAdAccountId" name="ad_account_id" placeholder="act_xxxxxxxxx">
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-6 mb-3">
+                                                <label for="metaAppId" class="form-label">App ID</label>
+                                                <input type="text" class="form-control" id="metaAppId" name="app_id" placeholder="Your Facebook app ID">
+                                            </div>
+                                            <div class="col-md-6 mb-3">
+                                                <label for="metaAppSecret" class="form-label">App Secret</label>
+                                                <input type="password" class="form-control" id="metaAppSecret" name="app_secret" placeholder="Your Facebook app secret">
+                                            </div>
+                                        </div>
+                                        <div class="integration-actions">
+                                            <button type="submit" class="btn btn-primary">
+                                                <i class="fas fa-plug me-2"></i>Connect Meta Ads
+                                            </button>
+                                            <button type="button" class="btn btn-outline-secondary ms-2" onclick="testMetaConnection()">
+                                                <i class="fas fa-vial me-2"></i>Test Connection
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+
+                            <!-- Integration Help -->
+                            <div class="integration-help">
+                                <div class="help-header">
+                                    <h5><i class="fas fa-question-circle me-2"></i>Need Help Getting Your API Credentials?</h5>
+                                </div>
+                                <div class="help-content">
+                                    <div class="help-section">
+                                        <h6>Google Ads Setup:</h6>
+                                        <ol>
+                                            <li>Visit <a href="https://developers.google.com/google-ads/api/docs/first-call/overview" target="_blank">Google Ads API documentation</a></li>
+                                            <li>Apply for a developer token</li>
+                                            <li>Create OAuth2 credentials in Google Cloud Console</li>
+                                            <li>Generate a refresh token using the OAuth2 flow</li>
+                                        </ol>
+                                    </div>
+                                    <div class="help-section">
+                                        <h6>Meta Ads Setup:</h6>
+                                        <ol>
+                                            <li>Go to <a href="https://developers.facebook.com/" target="_blank">Facebook Developers</a></li>
+                                            <li>Create a new app and add Marketing API</li>
+                                            <li>Generate an access token with <code>ads_management</code> permission</li>
+                                            <li>Find your Ad Account ID in Meta Business Manager</li>
+                                        </ol>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
