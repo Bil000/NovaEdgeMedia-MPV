@@ -6,6 +6,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from sqlalchemy.orm import DeclarativeBase
 from utils.openai_api import generate_marketing_report
+from utils.audience_insights import analyze_deep_audience_insights, filter_audience_noise, generate_precision_targeting_recommendations
 from integrations.ads_manager import AdsManager
 
 # Configure logging
@@ -529,6 +530,151 @@ def test_meta_ads_connection():
         return jsonify({
             'success': False,
             'error': f'Connection test failed: {str(e)}'
+        }), 500
+
+@app.route('/audience-insights', methods=['POST'])
+def generate_audience_insights():
+    """Generate deep audience insights with smart targeting and segmentation"""
+    try:
+        # Validate request data
+        data = request.get_json()
+        if not data:
+            return jsonify({
+                'success': False,
+                'error': 'No data provided'
+            }), 400
+
+        # Required field validation
+        if not data.get('target_audience'):
+            return jsonify({
+                'success': False,
+                'error': 'Target audience description is required'
+            }), 400
+
+        app.logger.info(f"Generating audience insights for: {data.get('target_audience')[:50]}...")
+
+        # Get real advertising data if available
+        real_ads_data = {}
+        if data.get('include_real_data', True):
+            try:
+                # Get current campaigns and performance
+                campaigns_data = ads_manager.get_all_campaigns()
+                performance_data = ads_manager.get_all_performance_data(days=30)
+                
+                real_ads_data = {
+                    'campaigns': campaigns_data,
+                    'performance': performance_data,
+                    'connected_platforms': ads_manager.connected_platforms
+                }
+                
+                app.logger.info(f"Retrieved real ads data from {len(ads_manager.connected_platforms)} platforms")
+            except Exception as e:
+                app.logger.warning(f"Could not retrieve real ads data: {str(e)}")
+
+        # Prepare campaign context
+        campaign_context = {
+            'campaign_name': data.get('campaign_name', ''),
+            'objectives': data.get('objectives', ''),
+            'budget': data.get('budget', 0)
+        }
+
+        # Generate deep audience insights
+        insights = analyze_deep_audience_insights(
+            target_audience=data.get('target_audience'),
+            campaign_data=campaign_context if any(campaign_context.values()) else None,
+            real_ads_data=real_ads_data if real_ads_data else None
+        )
+
+        # Generate noise filtering analysis
+        audience_data = {'total_users': data.get('estimated_audience_size', 10000)}
+        noise_analysis = filter_audience_noise(audience_data)
+
+        # Generate precision targeting recommendations
+        precision_recommendations = generate_precision_targeting_recommendations(
+            insights=insights,
+            campaign_budget=data.get('budget')
+        )
+
+        # Combine all insights
+        complete_analysis = {
+            'audience_insights': insights,
+            'noise_filtering': noise_analysis,
+            'precision_targeting': precision_recommendations,
+            'real_data_integration': {
+                'platforms_connected': len(ads_manager.connected_platforms),
+                'connected_platforms': ads_manager.connected_platforms,
+                'real_data_used': bool(real_ads_data)
+            }
+        }
+
+        app.logger.info("Deep audience insights generated successfully")
+
+        return jsonify({
+            'success': True,
+            'insights': complete_analysis
+        })
+
+    except Exception as e:
+        app.logger.error(f"Error generating audience insights: {str(e)}")
+        return jsonify({
+            'success': False,
+            'error': f'Failed to generate audience insights: {str(e)}'
+        }), 500
+
+@app.route('/precision-targeting', methods=['POST'])
+def generate_precision_targeting():
+    """Generate precision targeting recommendations with noise reduction"""
+    try:
+        data = request.get_json()
+        if not data or not data.get('target_audience'):
+            return jsonify({
+                'success': False,
+                'error': 'Target audience description is required'
+            }), 400
+
+        # Quick precision targeting analysis
+        campaign_context = {
+            'budget': data.get('budget', 0),
+            'objectives': data.get('objectives', ''),
+            'channels': data.get('channels', '')
+        }
+
+        # Generate basic insights for targeting
+        insights = analyze_deep_audience_insights(
+            target_audience=data.get('target_audience'),
+            campaign_data=campaign_context
+        )
+
+        # Generate targeting recommendations
+        recommendations = generate_precision_targeting_recommendations(
+            insights=insights,
+            campaign_budget=data.get('budget')
+        )
+
+        # Add noise filtering insights
+        audience_size = data.get('estimated_audience_size', 5000)
+        noise_analysis = filter_audience_noise({'total_users': audience_size})
+
+        return jsonify({
+            'success': True,
+            'targeting_recommendations': recommendations,
+            'audience_quality': {
+                'original_size': noise_analysis['original_size'],
+                'filtered_size': noise_analysis['filtered_size'],
+                'quality_score': noise_analysis['quality_score'],
+                'noise_reduction': {
+                    'bots_filtered': True,
+                    'irrelevant_users_filtered': True,
+                    'quality_improvement': noise_analysis['quality_metrics']['quality_improvement']
+                }
+            }
+        })
+
+    except Exception as e:
+        app.logger.error(f"Error generating precision targeting: {str(e)}")
+        return jsonify({
+            'success': False,
+            'error': f'Failed to generate precision targeting: {str(e)}'
         }), 500
 
 @app.errorhandler(404)

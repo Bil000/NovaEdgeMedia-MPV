@@ -36,6 +36,11 @@
                             </button>
                         </li>
                         <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="audience-insights-tab" data-bs-toggle="tab" data-bs-target="#audience-insights-pane" type="button" role="tab">
+                                <i class="fas fa-users-cog me-2"></i>Deep Audience Insights
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
                             <button class="nav-link" id="integrations-tab" data-bs-toggle="tab" data-bs-target="#integrations-pane" type="button" role="tab">
                                 <i class="fas fa-plug me-2"></i>Platform Integrations
                             </button>
@@ -115,6 +120,108 @@
                             </span>
                         </button>
                     </form>
+                        </div>
+
+                        <!-- Deep Audience Insights Tab -->
+                        <div class="tab-pane fade" id="audience-insights-pane" role="tabpanel">
+                            <div class="section-header">
+                                <h2><i class="fas fa-users-cog me-2"></i>Deep Audience Insights</h2>
+                                <p class="section-subtitle">Segment your audience based on behaviors and preferences with AI-powered precision targeting</p>
+                            </div>
+
+                            <!-- Audience Insights Form -->
+                            <div class="card mb-4">
+                                <div class="card-header">
+                                    <h5 class="mb-0">
+                                        <i class="fas fa-search me-2"></i>
+                                        Audience Analysis
+                                    </h5>
+                                </div>
+                                <div class="card-body">
+                                    <form id="audienceInsightsForm">
+                                        <div class="form-group mb-4">
+                                            <label for="insightsTargetAudience" class="form-label">
+                                                <i class="fas fa-users me-2"></i>Target Audience Description
+                                            </label>
+                                            <textarea class="form-control" id="insightsTargetAudience" name="target_audience" rows="4" required 
+                                                placeholder="Describe your target audience demographics, interests, behaviors, and preferences in detail..."></textarea>
+                                            <div class="form-text">Be specific about age groups, interests, online behaviors, and purchasing patterns for better insights.</div>
+                                        </div>
+
+                                        <div class="row mb-4">
+                                            <div class="col-md-6">
+                                                <label for="insightsBudget" class="form-label">
+                                                    <i class="fas fa-dollar-sign me-2"></i>Campaign Budget (Optional)
+                                                </label>
+                                                <input type="number" class="form-control" id="insightsBudget" name="budget" min="0" step="0.01" 
+                                                    placeholder="Enter budget for targeting recommendations">
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label for="insightsAudienceSize" class="form-label">
+                                                    <i class="fas fa-chart-bar me-2"></i>Estimated Audience Size
+                                                </label>
+                                                <input type="number" class="form-control" id="insightsAudienceSize" name="estimated_audience_size" min="100" 
+                                                    placeholder="10000" value="10000">
+                                            </div>
+                                        </div>
+
+                                        <div class="row mb-4">
+                                            <div class="col-md-6">
+                                                <label for="insightsCampaignName" class="form-label">
+                                                    <i class="fas fa-tag me-2"></i>Campaign Name (Optional)
+                                                </label>
+                                                <input type="text" class="form-control" id="insightsCampaignName" name="campaign_name" 
+                                                    placeholder="Enter campaign name for context">
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label for="insightsObjectives" class="form-label">
+                                                    <i class="fas fa-target me-2"></i>Campaign Objectives (Optional)
+                                                </label>
+                                                <input type="text" class="form-control" id="insightsObjectives" name="objectives" 
+                                                    placeholder="Brand awareness, conversions, etc.">
+                                            </div>
+                                        </div>
+
+                                        <div class="form-check mb-4">
+                                            <input class="form-check-input" type="checkbox" id="includeRealData" name="include_real_data" checked>
+                                            <label class="form-check-label" for="includeRealData">
+                                                <i class="fas fa-database me-2"></i>Include real advertising data (if platforms connected)
+                                            </label>
+                                        </div>
+
+                                        <button type="submit" class="btn btn-primary btn-lg" id="generateInsightsBtn">
+                                            <i class="fas fa-magic me-2"></i>
+                                            <span class="button-text">Generate Deep Insights</span>
+                                            <span class="spinner-border spinner-border-sm d-none" role="status"></span>
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+
+                            <!-- Audience Insights Features -->
+                            <div class="features-grid mb-4">
+                                <div class="feature-item">
+                                    <i class="fas fa-crosshairs"></i>
+                                    <span>Smart Targeting</span>
+                                </div>
+                                <div class="feature-item">
+                                    <i class="fas fa-filter"></i>
+                                    <span>Noise Reduction</span>
+                                </div>
+                                <div class="feature-item">
+                                    <i class="fas fa-sitemap"></i>
+                                    <span>Behavioral Segmentation</span>
+                                </div>
+                                <div class="feature-item">
+                                    <i class="fas fa-bullseye"></i>
+                                    <span>Precision Campaigns</span>
+                                </div>
+                            </div>
+
+                            <!-- Insights Results -->
+                            <div id="audienceInsightsResults" class="d-none">
+                                <div class="insights-content"></div>
+                            </div>
                         </div>
 
                         <!-- Platform Integrations Tab -->
