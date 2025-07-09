@@ -5,3 +5,5 @@ Flask-Migrate
 SQLAlchemy
 psycopg2-binary
 openai
+google-ads
+python-dotenv
