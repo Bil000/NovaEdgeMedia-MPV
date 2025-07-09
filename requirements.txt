@@ -6,4 +6,5 @@ SQLAlchemy
 psycopg2-binary
 openai
 google-ads
-python-dotenv 
+python-dotenv
+facebook-business
