@@ -1,8 +1,12 @@
 import json
+import os
+import openai
+from dotenv import load_dotenv
 import logging
 from typing import Dict, List, Optional
-from openai import OpenAI
-import os
+
+# Load environment variables from .env file if present
+load_dotenv()
 
 logger = logging.getLogger(__name__)
 
@@ -10,7 +14,7 @@ OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
 if not OPENAI_API_KEY:
     raise ValueError("OPENAI_API_KEY environment variable is required")
 
-openai = OpenAI(api_key=OPENAI_API_KEY)
+openai.api_key = OPENAI_API_KEY
 
 def analyze_deep_audience_insights(target_audience: str, campaign_data: Dict = None, real_ads_data: Dict = None) -> Dict:
     """

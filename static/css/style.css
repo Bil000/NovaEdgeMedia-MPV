@@ -358,6 +358,84 @@ body {
     color: var(--text-primary);
 }
 
+/* Deep Audience Insights Section - Match Campaign Analysis Style */
+#audience-insights-pane .card {
+    background: var(--card-bg);
+    border-radius: 12px;
+    box-shadow: var(--shadow);
+    border: none;
+    margin-bottom: 2rem;
+}
+
+#audience-insights-pane .card-header {
+    background: transparent;
+    border-bottom: 1px solid var(--border-color);
+    color: var(--accent-blue);
+    font-weight: 600;
+    font-size: 1.1rem;
+    border-radius: 12px 12px 0 0;
+}
+
+#audience-insights-pane .card-body {
+    padding: 2rem;
+}
+
+#audience-insights-pane .form-label,
+#audience-insights-pane .form-control,
+#audience-insights-pane .btn-primary {
+    /* Inherit campaign form styles */
+}
+
+#audience-insights-pane .features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 1.2rem;
+    margin-bottom: 2rem;
+}
+
+#audience-insights-pane .feature-item {
+    background: rgba(63, 81, 181, 0.1);
+    border-radius: 8px;
+    border: 1px solid rgba(63, 81, 181, 0.2);
+    padding: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    color: var(--text-primary);
+    font-weight: 500;
+    font-size: 0.95rem;
+}
+
+#audience-insights-pane .feature-item i {
+    color: var(--accent-blue);
+    font-size: 1.2rem;
+}
+
+#audience-insights-pane .section-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+#audience-insights-pane .section-header h2 {
+    font-size: 1.8rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+#audience-insights-pane .section-subtitle {
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    margin: 0;
+}
+
+#audience-insights-pane .btn-primary {
+    width: 100%;
+}
+
+#audience-insights-pane .spinner-border {
+    margin-left: 0.5rem;
+}
+
 /* Responsive Design */
 @media (max-width: 992px) {
     .container-fluid {

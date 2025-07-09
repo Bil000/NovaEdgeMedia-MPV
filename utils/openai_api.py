@@ -1,15 +1,16 @@
 import json
 import os
-from openai import OpenAI
+import openai
+from dotenv import load_dotenv
 
-# the newest OpenAI model is "gpt-4o" which was released May 13, 2024.
-# do not change this unless explicitly requested by the user
+# Load environment variables from .env file if present
+load_dotenv()
 
 OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
 if not OPENAI_API_KEY:
     raise ValueError("OPENAI_API_KEY environment variable is required")
 
-openai = OpenAI(api_key=OPENAI_API_KEY)
+openai.api_key = OPENAI_API_KEY
 
 def generate_marketing_report(campaign_name, target_audience, budget, duration, objectives, channels="", current_metrics="", real_ads_data=None):
     """
