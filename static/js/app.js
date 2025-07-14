@@ -522,7 +522,6 @@ class MarketingAssistant {
     // Handle Deep Audience Insights form submission
     async handleAudienceInsights(event) {
         event.preventDefault();
-        
         const formData = new FormData(this.audienceInsightsForm);
         const data = {
             target_audience: formData.get('target_audience'),
@@ -540,7 +539,7 @@ class MarketingAssistant {
         }
 
         try {
-            this.setInsightsButtonLoading(true);
+            this.showLoading(); // Use main loading animation
             this.hideInsightsError();
 
             const response = await fetch('/audience-insights', {
@@ -554,48 +553,46 @@ class MarketingAssistant {
             const result = await response.json();
 
             if (result.success) {
-                this.showAudienceInsights(result.insights);
+                this.showAudienceInsightsInMainReport(result.insights);
             } else {
-                this.showInsightsError(result.error || 'Failed to generate audience insights');
+                this.showError(result.error || 'Failed to generate audience insights');
             }
         } catch (error) {
             console.error('Error generating audience insights:', error);
-            this.showInsightsError('Network error occurred. Please try again.');
-        } finally {
-            this.setInsightsButtonLoading(false);
+            this.showError('Network error occurred. Please try again.');
         }
     }
 
-    // Display audience insights results
-    showAudienceInsights(insights) {
-        const resultsContainer = this.audienceInsightsResults;
-        const contentContainer = resultsContainer.querySelector('.insights-content');
-        
-        if (!contentContainer) return;
+    // Display audience insights results in the main report area
+    showAudienceInsightsInMainReport(insights) {
+        this.setButtonLoading(false);
+        this.hideAllStates();
+        this.renderAudienceInsightsReport(insights);
+        this.reportContent.classList.remove('d-none');
+        this.reportContent.classList.add('fade-in');
+    }
 
-        // Build insights HTML
-        let html = '<div class="insights-dashboard">';
-        
+    // Render audience insights in the main report area
+    renderAudienceInsightsReport(insights) {
+        let html = `<div class="report-header">
+            <h3 class="report-title">
+                <i class="fas fa-users-cog me-2"></i>
+                Deep Audience Insights
+            </h3>
+            <p class="report-subtitle">
+                AI-powered segmentation, targeting, and quality analysis
+            </p>
+        </div>`;
+
         // Overview Section
         if (insights.audience_insights && insights.audience_insights.audience_overview) {
             const overview = insights.audience_insights.audience_overview;
             html += `
-                <div class="insight-section">
-                    <h3><i class="fas fa-users me-2"></i>Audience Overview</h3>
-                    <div class="overview-grid">
-                        <div class="overview-card">
-                            <h5>Primary Segments</h5>
-                            <p>${overview.primary_segments || 'Not specified'}</p>
-                        </div>
-                        <div class="overview-card">
-                            <h5>Key Characteristics</h5>
-                            <p>${overview.key_characteristics || 'Not specified'}</p>
-                        </div>
-                        <div class="overview-card">
-                            <h5>Market Size</h5>
-                            <p>${overview.market_size_estimate || 'Not specified'}</p>
-                        </div>
-                    </div>
+                <div class="report-section">
+                    <h4><i class="fas fa-users"></i> Audience Overview</h4>
+                    <p><strong>Primary Segments:</strong> ${overview.primary_segments || 'Not specified'}</p>
+                    <p><strong>Key Characteristics:</strong> ${overview.key_characteristics || 'Not specified'}</p>
+                    <p><strong>Market Size:</strong> ${overview.market_size_estimate || 'Not specified'}</p>
                 </div>
             `;
         }
@@ -604,56 +601,51 @@ class MarketingAssistant {
         if (insights.audience_insights && insights.audience_insights.behavioral_segmentation) {
             const segmentation = insights.audience_insights.behavioral_segmentation;
             html += `
-                <div class="insight-section">
-                    <h3><i class="fas fa-sitemap me-2"></i>Behavioral Segmentation</h3>
-                    <div class="segmentation-grid">
+                <div class="report-section">
+                    <h4><i class="fas fa-sitemap"></i> Behavioral Segmentation</h4>
             `;
-            
             ['high_value_segment', 'growth_segment', 'nurturing_segment'].forEach(segmentKey => {
                 const segment = segmentation[segmentKey];
                 if (segment) {
                     html += `
-                        <div class="segment-card">
-                            <h5>${segment.description || 'Segment'}</h5>
-                            <p><strong>Size:</strong> ${segment.estimated_size || 'Unknown'}</p>
-                            <p><strong>Strategy:</strong> ${segment.targeting_strategy || 'Not specified'}</p>
-                            ${segment.behaviors ? `<div class="behaviors">${segment.behaviors.map(b => `<span class="behavior-tag">${b}</span>`).join('')}</div>` : ''}
+                        <div class="metric-item">
+                            <strong>${segment.description || 'Segment'}</strong><br>
+                            <span>Size: ${segment.estimated_size || 'Unknown'}</span><br>
+                            <span>Strategy: ${segment.targeting_strategy || 'Not specified'}</span><br>
+                            ${segment.behaviors ? `<span>Behaviors: ${segment.behaviors.join(', ')}</span>` : ''}
                         </div>
                     `;
                 }
             });
-            
-            html += '</div></div>';
+            html += '</div>';
         }
 
         // Noise Reduction Analysis
         if (insights.noise_filtering) {
             const noise = insights.noise_filtering;
             html += `
-                <div class="insight-section">
-                    <h3><i class="fas fa-filter me-2"></i>Audience Quality & Noise Reduction</h3>
-                    <div class="noise-analysis">
-                        <div class="quality-metrics">
-                            <div class="metric">
-                                <span class="metric-label">Original Audience Size</span>
-                                <span class="metric-value">${noise.original_size?.toLocaleString() || 'Unknown'}</span>
-                            </div>
-                            <div class="metric">
-                                <span class="metric-label">Filtered Size</span>
-                                <span class="metric-value">${noise.filtered_size?.toLocaleString() || 'Unknown'}</span>
-                            </div>
-                            <div class="metric">
-                                <span class="metric-label">Quality Score</span>
-                                <span class="metric-value">${Math.round((noise.quality_score || 0) * 100)}%</span>
-                            </div>
+                <div class="report-section">
+                    <h4><i class="fas fa-filter"></i> Audience Quality & Noise Reduction</h4>
+                    <div class="metric-grid">
+                        <div class="metric-item">
+                            <span class="metric-label">Original Audience Size</span>
+                            <span class="metric-value">${noise.original_size?.toLocaleString() || 'Unknown'}</span>
                         </div>
-                        ${noise.removed_segments ? `
-                            <div class="removed-segments">
-                                <h6>Filtered Out:</h6>
-                                <ul>${noise.removed_segments.map(segment => `<li>${segment}</li>`).join('')}</ul>
-                            </div>
-                        ` : ''}
+                        <div class="metric-item">
+                            <span class="metric-label">Filtered Size</span>
+                            <span class="metric-value">${noise.filtered_size?.toLocaleString() || 'Unknown'}</span>
+                        </div>
+                        <div class="metric-item">
+                            <span class="metric-label">Quality Score</span>
+                            <span class="metric-value">${Math.round((noise.quality_score || 0) * 100)}%</span>
+                        </div>
                     </div>
+                    ${noise.removed_segments ? `
+                        <div class="removed-segments">
+                            <h6>Filtered Out:</h6>
+                            <ul>${noise.removed_segments.map(segment => `<li>${segment}</li>`).join('')}</ul>
+                        </div>
+                    ` : ''}
                 </div>
             `;
         }
@@ -662,106 +654,46 @@ class MarketingAssistant {
         if (insights.precision_targeting) {
             const targeting = insights.precision_targeting;
             html += `
-                <div class="insight-section">
-                    <h3><i class="fas fa-bullseye me-2"></i>Precision Targeting Recommendations</h3>
-                    <div class="targeting-recommendations">
+                <div class="report-section">
+                    <h4><i class="fas fa-bullseye"></i> Precision Targeting Recommendations</h4>
             `;
-            
             if (targeting.targeting_strategy) {
                 html += `
-                    <div class="recommendation-card">
-                        <h5>Targeting Strategy</h5>
-                        <p><strong>Primary Focus:</strong> ${targeting.targeting_strategy.primary_focus || 'Not specified'}</p>
-                        <p><strong>Approach:</strong> ${targeting.targeting_strategy.targeting_approach || 'Not specified'}</p>
-                    </div>
+                    <div><strong>Primary Focus:</strong> ${targeting.targeting_strategy.primary_focus || 'Not specified'}</div>
+                    <div><strong>Approach:</strong> ${targeting.targeting_strategy.targeting_approach || 'Not specified'}</div>
                 `;
             }
-            
             if (targeting.budget_allocation) {
-                html += `
-                    <div class="recommendation-card">
-                        <h5>Budget Allocation</h5>
-                        <div class="budget-breakdown">
-                `;
+                html += '<div class="metric-grid">';
                 Object.entries(targeting.budget_allocation).forEach(([segment, allocation]) => {
                     if (allocation.percentage) {
                         html += `
-                            <div class="budget-item">
+                            <div class="metric-item">
                                 <span>${segment.replace('_', ' ').toUpperCase()}</span>
                                 <span>${allocation.percentage}% ($${allocation.amount?.toLocaleString() || '0'})</span>
                             </div>
                         `;
                     }
                 });
-                html += '</div></div>';
+                html += '</div>';
             }
-            
-            html += '</div></div>';
+            html += '</div>';
         }
 
         // Real Data Integration Status
         if (insights.real_data_integration) {
             const integration = insights.real_data_integration;
             html += `
-                <div class="insight-section">
-                    <h3><i class="fas fa-database me-2"></i>Data Integration Status</h3>
-                    <div class="integration-status">
-                        <p><strong>Platforms Connected:</strong> ${integration.platforms_connected || 0}</p>
-                        ${integration.connected_platforms?.length ? `
-                            <p><strong>Connected:</strong> ${integration.connected_platforms.join(', ')}</p>
-                        ` : '<p><em>No platforms connected - Connect Google Ads or Meta Ads for enhanced insights</em></p>'}
-                        <p><strong>Real Data Used:</strong> ${integration.real_data_used ? 'Yes' : 'No'}</p>
-                    </div>
+                <div class="report-section">
+                    <h4><i class="fas fa-database"></i> Data Integration Status</h4>
+                    <p><strong>Platforms Connected:</strong> ${integration.platforms_connected || 0}</p>
+                    ${integration.connected_platforms?.length ? `<p><strong>Connected:</strong> ${integration.connected_platforms.join(', ')}</p>` : '<p><em>No platforms connected - Connect Google Ads or Meta Ads for enhanced insights</em></p>'}
+                    <p><strong>Real Data Used:</strong> ${integration.real_data_used ? 'Yes' : 'No'}</p>
                 </div>
             `;
         }
 
-        html += '</div>';
-        
-        contentContainer.innerHTML = html;
-        resultsContainer.classList.remove('d-none');
-        resultsContainer.scrollIntoView({ behavior: 'smooth' });
-    }
-
-    // Set insights button loading state
-    setInsightsButtonLoading(loading) {
-        const btn = document.getElementById('generateInsightsBtn');
-        if (!btn) return;
-        
-        const text = btn.querySelector('.button-text');
-        const spinner = btn.querySelector('.spinner-border');
-        
-        if (loading) {
-            btn.disabled = true;
-            text.textContent = 'Generating Insights...';
-            spinner.classList.remove('d-none');
-        } else {
-            btn.disabled = false;
-            text.textContent = 'Generate Deep Insights';
-            spinner.classList.add('d-none');
-        }
-    }
-
-    // Show insights error
-    showInsightsError(message) {
-        // Create or update error message
-        let errorDiv = document.getElementById('audienceInsightsError');
-        if (!errorDiv) {
-            errorDiv = document.createElement('div');
-            errorDiv.id = 'audienceInsightsError';
-            errorDiv.className = 'alert alert-danger mt-3';
-            this.audienceInsightsForm.appendChild(errorDiv);
-        }
-        errorDiv.innerHTML = `<i class="fas fa-exclamation-triangle me-2"></i>${message}`;
-        errorDiv.style.display = 'block';
-    }
-
-    // Hide insights error
-    hideInsightsError() {
-        const errorDiv = document.getElementById('audienceInsightsError');
-        if (errorDiv) {
-            errorDiv.style.display = 'none';
-        }
+        this.reportContent.innerHTML = html;
     }
 }
 

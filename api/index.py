@@ -9,3 +9,4 @@ from app import app  # Import the Flask app from app.py
 
 # Vercel looks for 'app' variable
 # No need for if __name__ == '__main__' block
+
